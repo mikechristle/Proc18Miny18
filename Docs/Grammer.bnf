@@ -1,0 +1,150 @@
+//---------------------------------------------------------------------------
+// Miny18 Language Grammar
+// Mike Christle Aug 2019
+//---------------------------------------------------------------------------
+// Abc  Rule
+// ->   Is defined by
+// abc  Keyword
+// |    Or
+// []   Range
+// +    Repeat one or more times
+// *    Repeat zero or more times
+// ?    Repeat zero or one times
+// #    Comma separated list  X# -> X ( ',' X )*
+// ()   Group
+// 'x'  Symbol
+// ;    Rule terminator
+//---------------------------------------------------------------------------
+
+Start        -> ModuleDecl* ;
+
+ModuleDecl   -> module Label '{' ( ItemDecl | FuncDecl )* '}' ;
+
+ItemDecl     -> IntDecl | BoolDecl | PortDecl | ConstDecl ;
+
+FuncDecl     -> func Label ParmList ( bool | int | IsrDecl )? CodeBlock ;
+
+ParmList     -> '(' ( ParmType Label )#? ')' ;
+
+ParmType     -> bool | int | ram | rom ;
+
+IsrDecl      -> isr DecConst ;
+
+IntDecl      -> int ( Label ( '[' IntConst ']' )? )# ;
+
+BoolDecl     -> bool ( Label ( IntConst )? )# ;
+
+PortDecl     -> port Label IntConst ;
+
+ConstDecl    -> const Label ( LogOrExpr# | StringConst ) ;
+
+CodeBlock    -> '{' Statement* '}' ;
+
+Statement    -> DataDecl
+              | AssignStmt
+              | IfStmt
+              | LoopStmt
+              | BreakStmt
+              | ContinueStmt
+              | ResetStmt
+              | RestartStmt
+              | LevelStmt
+              | HaltStmt
+              | TimerStmt
+              | PauseStmt
+              | ReturnStmt
+              | CodeBlock ;
+
+DataDecl     -> ( bool | int ) Label '=' LogOrExpr ;
+
+AssignStmt   -> LabelDest AssignOp LogOrExpr ;
+
+LabelDest    -> Label
+              | Label '[' OrExpr ']'
+              | Label '.' Label
+              | Label '.' Label '[' OrExpr ']' ;
+
+AssignOp     -> '='
+              | '+=' | '-=' | '*='
+              | '&=' | '|=' | '^='
+              | '>>=' | '<<=' ;
+
+IfStmt       -> IfClause ElIfClause* ElseClause? ;
+
+IfClause     -> if LogOrExpr Statement ;
+
+ElIfClause   -> elif LogOrExpr Statement ;
+
+ElseClause   -> else Statement ;
+
+LoopStmt     -> loop Statement ;
+
+BreakStmt    -> break ;
+
+ContinueStmt -> continue ;
+
+ResetStmt    -> reset ;
+
+RestartStmt  -> restart ;
+
+LevelStmt    -> level IntConst ;
+
+HaltStmt     -> halt ;
+
+TimerStmt    -> timer OrExpr ;
+
+PauseStmt    -> pause ;
+
+ReturnStmt   -> return ( LogAndExpr )? ;
+
+LogOrExpr    -> LogAndExpr ( or LogAndExpr )* ;
+
+LogAndExpr   -> RelExpr ( and RelExpr )* ;
+
+RelExpr      -> OrExpr ( CompareOp OrExpr )? ;
+
+CompareOp    -> '==' | '!=' | '>=' | '<=' | '>' | '<' ; 
+
+OrExpr       -> XorExpr ( '|' XorExpr )* ;
+
+XorExpr      -> AndExpr ( '^' AndExpr )* ; 
+
+AndExpr      -> ShiftExpr ( '&' ShiftExpr )* ;
+
+ShiftExpr    -> AddExpr ( ( '<<' | '>>' ) AddExpr )? ;
+
+AddExpr      -> MultExpr ( ( '+' | '-' ) MultExpr )* ;
+
+MultExpr     -> UnaryExpr ( ( '*' | '/' | '%' ) UnaryExpr )* ;
+
+UnaryExpr    -> ( '+' | '-' | '~' | not )? Atom ;
+
+Atom         -> LabelExpr
+              | BoolConst
+              | IntConst
+              | '(' LogOrExpr ')' ;
+
+LabelExpr    -> Label
+              | Label '[' OrExpr ']'
+              | Label '(' LogOrExpr# ')'
+              | Label '.' Label
+              | Label '.' Label '[' OrExpr ']'
+              | Label '.' Label '(' LogOrExpr# ')' ;
+
+Label        -> [a-zA-Z][a-zA-Z0-9_]* ;
+
+BoolConst    -> true | false ;
+
+IntConst     -> BinConst | OctConst | DecConst | HexConst | CharConst ;
+
+DecConst     -> [0-9][0-9_]* ;
+
+BinConst     -> 0b [01_]+ ;
+
+OctConst     -> 0o [0-7_]+ ;
+
+HexConst     -> 0x [0-9a-fA-F_]+ ;
+
+StringConst  -> '"' ascii_text '"' ;
+
+CharConst    -> ''' ascii_char ''' ;
