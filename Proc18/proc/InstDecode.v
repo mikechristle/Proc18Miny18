@@ -8,6 +8,7 @@
 // History: 
 // 0.1.0   04/29/2018   File Created
 // 1.0.0   09/01/2020   Initial release
+// 1.1.0   09/07/2020   Add one clock delay on RUN input to sync to CLK
 //////////////////////////////////////////////////////////////////////////////
 // Copyright 2020 Mike Christle
 //
@@ -90,6 +91,7 @@ module InstDecode(
     reg [5:0] dadrs_temp = 0;
     reg [3:0] level = 15;
     reg stat_flag = 0;
+    reg run1 = 0;
 
     wire [11:0] pc_plus_one = PC + 12'd1;
     wire interrupt = (VECTOR > level) && (state[0] || state[4] || state[8]);
@@ -121,8 +123,9 @@ module InstDecode(
 
 //-------------------------------------------------------------------
     always @ (posedge CLK) begin
+        run1 <= RUN;
 
-        if (!RUN)
+        if (!RUN || !run1)
             begin
             PC <= 0;
             state <= STATE_0;
