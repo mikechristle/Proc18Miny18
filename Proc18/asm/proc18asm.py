@@ -6,6 +6,7 @@
 # History: 
 # 0.1.0   08/16/2020   File Created
 # 1.0.0   09/01/2020   Initial release
+# 1.1.0   09/07/2020   Fix bug in BCLR and BSET opcodes
 #----------------------------------------------------------------------------
 # Copyright 2020 Mike Christle
 #
@@ -758,9 +759,9 @@ op_table = {
     'BCMP'   : (_simple2, 0o30_00_00),
     'BMOV'   : (_simple2, 0o31_00_00),
     'BTST'   : (_bit, 0o31_00_00),
-    'BCLR'   : (_bit, 0o32_00_00),
-    'BSET'   : (_bit, 0o33_00_00),
     'BNOT'   : (_simple2, 0o32_00_00),
+    'BCLR'   : (_bit, 0o33_00_00),
+    'BSET'   : (_bit, 0o34_00_00),
     'BAND'   : (_simple2, 0o35_00_00),
     'BOR'    : (_simple2, 0o36_00_00),
     'BXOR'   : (_simple2, 0o37_00_00),
