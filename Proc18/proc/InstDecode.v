@@ -9,6 +9,7 @@
 // 0.1.0   04/29/2018   File Created
 // 1.0.0   09/01/2020   Initial release
 // 1.1.0   09/07/2020   Add one clock delay on RUN input to sync to CLK
+// 1.2.0   09/08/2020   Optimize interrupt processing and cleanup
 //////////////////////////////////////////////////////////////////////////////
 // Copyright 2020 Mike Christle
 //
@@ -38,7 +39,7 @@ module InstDecode(
     CLK, RUN, VECTOR, INST,
     DATAIN, TIMER_ZERO, BRANCH,
     CONST_RD, PORT_WR, PORT_RD, RAM_WR,
-    RESET, PC, SP, PCO,
+    RESET, RUNS, PC, SP, PCO,
     DATA_SL, TIMER_LD, NDATA, BRANCH_OP,
     BIT_LD, STAT_LD, ALU_OP, ALUS_SL,
     ADRS_SL, REG_WE, DADRS, SADRS
@@ -56,7 +57,8 @@ module InstDecode(
     output reg PORT_WR = 0;
     output reg PORT_RD = 0;
     output reg RAM_WR = 0;
-    output reg RESET  = 1;
+    output reg RESET = 1;
+    output reg RUNS = 0;
 
     output reg [11:0] PC = 0;
     output reg [11:0] PCO = 0;
@@ -76,25 +78,24 @@ module InstDecode(
     output reg [2:0] BRANCH_OP = 0;
 
 //-------------------------------------------------------------------
-    localparam STATE_0 = 10'b0000000001, //   1 Normal
-               STATE_1 = 10'b0000000010, //   2 LDI
-               STATE_2 = 10'b0000000100, //   4 LDR
-               STATE_3 = 10'b0000001000, //   8 LDC
-               STATE_4 = 10'b0000010000, //  16 STOP
-               STATE_5 = 10'b0000100000, //  32 RTS, RTI
-               STATE_6 = 10'b0001000000, //  64 RTS, RTI
-               STATE_7 = 10'b0010000000, // 128 JXX
-               STATE_8 = 10'b0100000000, // 256 
-               STATE_9 = 10'b1000000000; // 512 Interrupt
+    localparam STATE_0 = 10'b0000000001, // 0001 Normal
+               STATE_1 = 10'b0000000010, // 0002 LDI
+               STATE_2 = 10'b0000000100, // 0004 LDR
+               STATE_3 = 10'b0000001000, // 0010 LDC
+               STATE_4 = 10'b0000010000, // 0020 STOP
+               STATE_5 = 10'b0000100000, // 0040 RTS, RTI
+               STATE_6 = 10'b0001000000, // 0100 RTS, RTI
+               STATE_7 = 10'b0010000000, // 0200 JXX
+               STATE_8 = 10'b0100000000, // 0400 
+               STATE_9 = 10'b1000000000; // 1000 Interrupt
 
     reg [9:0] state = 0;
     reg [5:0] dadrs_temp = 0;
     reg [3:0] level = 15;
     reg stat_flag = 0;
-    reg run1 = 0;
 
     wire [11:0] pc_plus_one = PC + 12'd1;
-    wire interrupt = (VECTOR > level) && (state[0] || state[4] || state[8]);
+    wire interrupt = (VECTOR > level) && (state[0] || state[4]);
 
     wire op_halt  = INST[17:6] == 12'o0001;
     wire op_pause = INST[17:6] == 12'o0002;
@@ -123,9 +124,9 @@ module InstDecode(
 
 //-------------------------------------------------------------------
     always @ (posedge CLK) begin
-        run1 <= RUN;
+        RUNS <= RUN;
 
-        if (!RUN || !run1)
+        if (!RUN || !RUNS)
             begin
             PC <= 0;
             state <= STATE_0;
@@ -136,7 +137,8 @@ module InstDecode(
 
             RESET <= state[0] & op_reset;  // RESET
 
-            PC <= (state[9])                         ? {14'd0, VECTOR} : // Interrupt
+            PC <= (interrupt)                        ? {14'd0, VECTOR} : // Interrupt
+                  (state[9])                         ? PC :              // Interrupt
                   (state[7] && BRANCH)               ? INST[11:0] :      // JXX
                   (state[0] && op_jxx)               ? PC :              // JXX
                   (state[2] || state[3] || state[4]) ? PC :              // LDR, LDC, STOP
@@ -145,9 +147,9 @@ module InstDecode(
                   (state[6])                         ? DATAIN :          // RTS, RTI 
                                                        pc_plus_one;      // Default
 
-            PCO <= (state[9])              ? PC :          // Interrupt
+            PCO <= (interrupt)             ? PC :          // Interrupt
                    (state[0] && op_call)   ? pc_plus_one : // CALL
-                                             12'd0;        // Default
+                                             PCO;          // Default
 
             SP <= (state[9])                ? SP - 1 : // Interrupt
                   (state[0] && op_call)     ? SP - 1 : // CALL
@@ -170,7 +172,7 @@ module InstDecode(
             DATA_SL  <= state[9] ||           // Interrupt
                        (state[0] && op_call); // CALL
 
-            level <= (state[9])                ? VECTOR :        // Interrupt
+            level <= (interrupt)               ? VECTOR :        // Interrupt
                      (state[0] && op_level)    ? INST[3:0] :     // LEVEL
                      (state[6] && stat_flag)   ? DATAIN[15:12] : // RTI
                      (state[0] && PC == 12'd0) ? 4'd15 :         // RESTART
@@ -221,14 +223,13 @@ module InstDecode(
 
             if (state[0]) stat_flag <= op_rti;
 
-            STAT_LD <= (state[6] && stat_flag) ? 2'd3 : // RTI
+            STAT_LD <= (state[5] && stat_flag) ? 2'd3 : // RTI
                        (state[0] && op_cmp)    ? 2'd1 : // CMP, CMPI
                        (state[0] && op_alub)   ? 2'd2 : // ALUB
                                                  2'd0;  // Default
 
             NDATA <= (interrupt)           ? {8'd0, level} :      // Interrupt
                      (state[0] && op_alui) ? {6'd0, INST[11:6]} : // ALUI
-                     //(state[0] && op_timer) ? INST[11:0] :         // TIMER
                      (state[0] && op_in)   ? {6'd0, INST[11:6]} : // IN
                      (state[0] && op_out)  ? {6'd0, INST[5:0]} :  // OUT
                                              NDATA;               // Default

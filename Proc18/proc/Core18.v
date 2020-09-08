@@ -8,6 +8,7 @@
 // History: 
 // 0.1.0   05/10/2018   File Created
 // 1.0.0   09/01/2020   Initial release
+// 1.1.0   09/07/2020   Add RUNS signal to sync RUN to CLK
 //////////////////////////////////////////////////////////////////////////////
 // Copyright 2020 Mike Christle
 //
@@ -72,6 +73,7 @@ module Core18(CLK, RUN, VECTOR, BITSIN, INST, DATAIN,
     wire [1:0] STAT;
     wire [1:0] STAT_LD;
     wire BIT;
+    wire RUNS;
 
     wire [17:0] DREG;
     wire [17:0] SREG;
@@ -98,7 +100,7 @@ module Core18(CLK, RUN, VECTOR, BITSIN, INST, DATAIN,
 
     BitMem  BitMem_ (
         .CLK(CLK), 
-        .RESET(RESET), 
+        .RESET(!RUNS), 
         .LOAD(BIT_LD), 
         .OP(ALU_OP[2:0]),
         .SADRS(SADRS), 
@@ -127,6 +129,7 @@ module Core18(CLK, RUN, VECTOR, BITSIN, INST, DATAIN,
     InstDecode  InstDecode_ (
         .CLK(CLK), 
         .RUN(RUN), 
+        .RUNS(RUNS), 
         .VECTOR(VECTOR), 
         .INST(INST), 
         .DATAIN(DATAIN), 
@@ -175,7 +178,7 @@ module Core18(CLK, RUN, VECTOR, BITSIN, INST, DATAIN,
 
     Timer  Timer_ (
         .CLK(CLK), 
-        .RESET(RESET), 
+        .RESET(!RUNS), 
         .LOAD(TIMER_LD), 
         .DATA(INST[11:0]), 
         .ZERO(TIMER_ZERO));
