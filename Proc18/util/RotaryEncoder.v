@@ -8,6 +8,7 @@
 // History: 
 // 0.1.0   08/31/2020   File Created
 // 1.0.0   09/01/2020   Initial release
+// 2.0.0   09/08/2020   Add CS input & INT output to support interrupts
 //////////////////////////////////////////////////////////////////////////////
 // Copyright 2020 Mike Christle
 //
@@ -33,34 +34,45 @@
 // OTHER DEALINGS IN THE SOFTWARE.
 //////////////////////////////////////////////////////////////////////////////
 
-module RotaryEncoder(CLK, WE, A, B, DI, DO);
+module RotaryEncoder(CLK, CS, WE, A, B, DI, DO, INT);
 
     parameter DIVIDER_BITS = 3;
     parameter COUNTER_BITS = 8;
 
     input CLK;
+    input CS;
     input WE;
     input A;
     input B;
     input [COUNTER_BITS - 1:0] DI;
 
     output reg [COUNTER_BITS - 1:0] DO = 0;
+    output reg INT;
 
-    reg state = 0;
+    reg last_a = 0;
     reg [DIVIDER_BITS - 1:0] divider = 0;
+
+    initial begin
+        DO = 0;
+        INT = 0;
+    end
     
     always @(posedge CLK) begin
 
         divider <= divider + 1;
 
-        if (WE) begin
+        if (CS & WE) begin
             DO <= DI;
         end
+        else if (CS) begin
+            INT <= 0;
+        end
         else if (divider == 0) begin
-            state <= A;
-            if (A & !state) begin
+            last_a <= A;
+            if (A & !last_a) begin
                 if (B) DO <= DO + 1;
                 else   DO <= DO - 1;
+                INT <= 1;
             end
         end
     end
