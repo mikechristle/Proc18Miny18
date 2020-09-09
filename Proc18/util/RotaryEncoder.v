@@ -3,12 +3,14 @@
 // Engineer:    Mike Christle
 // Module Name: Rotary Encoder
 //
-// Description: Decode a rotary encoder and maintain a counter.
+// Decode a rotary encoder and maintain a counter. Requires a 10 uSec clock
+// from the IntTimer module. Samples the input signals every 5 mSec.
 //
 // History: 
 // 0.1.0   08/31/2020   File Created
 // 1.0.0   09/01/2020   Initial release
 // 2.0.0   09/08/2020   Add CS input & INT output to support interrupts
+//                      Added system clock
 //////////////////////////////////////////////////////////////////////////////
 // Copyright 2020 Mike Christle
 //
@@ -34,12 +36,12 @@
 // OTHER DEALINGS IN THE SOFTWARE.
 //////////////////////////////////////////////////////////////////////////////
 
-module RotaryEncoder(CLK, CS, WE, A, B, DI, DO, INT);
+module RotaryEncoder(CLK, CLK_10U, CS, WE, A, B, DI, DO, INT);
 
-    parameter DIVIDER_BITS = 3;
     parameter COUNTER_BITS = 8;
 
     input CLK;
+    input CLK_10U;
     input CS;
     input WE;
     input A;
@@ -50,7 +52,7 @@ module RotaryEncoder(CLK, CS, WE, A, B, DI, DO, INT);
     output reg INT;
 
     reg last_a = 0;
-    reg [DIVIDER_BITS - 1:0] divider = 0;
+    reg [8:0] divider = 0;
 
     initial begin
         DO = 0;
@@ -58,21 +60,21 @@ module RotaryEncoder(CLK, CS, WE, A, B, DI, DO, INT);
     end
     
     always @(posedge CLK) begin
-
-        divider <= divider + 1;
-
         if (CS & WE) begin
             DO <= DI;
         end
         else if (CS) begin
             INT <= 0;
         end
-        else if (divider == 0) begin
-            last_a <= A;
-            if (A & !last_a) begin
-                if (B) DO <= DO + 1;
-                else   DO <= DO - 1;
-                INT <= 1;
+        else if (CLK_10U) begin
+            divider <= divider + 1;
+            if (divider == 0) begin
+                last_a <= A;
+                if (A & !last_a) begin
+                    if (B) DO <= DO + 1;
+                    else   DO <= DO - 1;
+                    INT <= 1;
+                end
             end
         end
     end
