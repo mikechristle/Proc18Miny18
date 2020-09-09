@@ -3,11 +3,13 @@
 // Engineer:    Mike Christle
 // Module Name: SonyIR
 //
-// Description: Sony SIRC receiver.
+// Sony SIRC receiver. Supports 12 and 15 bit count versions.
+// The 20 bit version does not fit on the Proc18 18 bit bus.
 //
 // History: 
 // 0.1.0   07/14/2019   File Created
 // 1.0.0   09/01/2020   Initial release
+// 1.1.0   09/01/2020   Add parameter to set bit count
 //////////////////////////////////////////////////////////////////////////////
 // Copyright 2020 Mike Christle
 //
@@ -33,20 +35,20 @@
 // OTHER DEALINGS IN THE SOFTWARE.
 //////////////////////////////////////////////////////////////////////////////
 
-module SonyIR(
-    input CLK,
-    input CLK_10U,
-    input RESET,
-    input CS,
-    input IR,
+module SonyIR(CLK, CLK_10U, RESET, CS, IR, READY, DO);
 
-    output reg READY,
-    output reg [7:0] DO
-    );
+    parameter BIT_CNT = 12;
 
-    initial READY = 0;
+    input CLK;
+    input CLK_10U;
+    input RESET;
+    input CS;
+    input IR;
 
-    reg [7:0] shift;
+    output reg READY = 0;
+    output reg [BIT_CNT - 1:0] DO = 0;
+
+    reg [BIT_CNT - 1:0] shift;
     reg [2:0] state = 0;
     reg ir0, ir1, active_edge;
     reg [15:0] time_out = 0;
@@ -89,7 +91,7 @@ module SonyIR(
             6'b0_001: begin
                 time_out <= time_out - 1;
                 if (time_out == 0) begin
-                    bit_cnt <= 7;
+                    bit_cnt <= BIT_CNT - 1;
                     time_out <= 120;
                     state <= 2;
                     end
@@ -115,7 +117,7 @@ module SonyIR(
             6'b0_011: begin
                 time_out <= time_out - 1;
                 if (time_out == 0) begin
-                    shift <= {~ir1, shift[7:1]};
+                    shift <= {~ir1, shift[BIT_CNT - 1:1]};
                     bit_cnt <= bit_cnt - 1;
                     time_out <= 120;
                     if (bit_cnt == 0) state <= 4;
