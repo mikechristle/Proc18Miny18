@@ -11,6 +11,8 @@
 // 1.0.0   09/01/2020   Initial release
 // 2.0.0   09/08/2020   Add CS input & INT output to support interrupts
 //                      Added system clock
+// 2.1.0   09/10/2020   Reduce sample time by reducing divider to 8 bits
+// 2.1.1   09/10/2020   Correct initial states
 //////////////////////////////////////////////////////////////////////////////
 // Copyright 2020 Mike Christle
 //
@@ -49,16 +51,11 @@ module RotaryEncoder(CLK, CLK_10U, CS, WE, A, B, DI, DO, INT);
     input [COUNTER_BITS - 1:0] DI;
 
     output reg [COUNTER_BITS - 1:0] DO = 0;
-    output reg INT;
+    output reg INT = 0;
 
-    reg last_a = 0;
-    reg [8:0] divider = 0;
+    reg last_a = 1;
+    reg [7:0] divider = 0;
 
-    initial begin
-        DO = 0;
-        INT = 0;
-    end
-    
     always @(posedge CLK) begin
         if (CS & WE) begin
             DO <= DI;
