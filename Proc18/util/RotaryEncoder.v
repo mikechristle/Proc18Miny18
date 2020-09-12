@@ -13,6 +13,7 @@
 //                      Added system clock
 // 2.1.0   09/10/2020   Reduce sample time by reducing divider to 8 bits
 // 2.1.1   09/10/2020   Correct initial states
+// 2.1.2   09/12/2020   Specify bit size on add equations
 //////////////////////////////////////////////////////////////////////////////
 // Copyright 2020 Mike Christle
 //
@@ -64,12 +65,12 @@ module RotaryEncoder(CLK, CLK_10U, CS, WE, A, B, DI, DO, INT);
             INT <= 0;
         end
         else if (CLK_10U) begin
-            divider <= divider + 1;
+            divider <= divider + 8'd1;
             if (divider == 0) begin
                 last_a <= A;
                 if (A & !last_a) begin
-                    if (B) DO <= DO + 1;
-                    else   DO <= DO - 1;
+                    if (B) DO <= DO + 8'd1;
+                    else   DO <= DO - 8'd1;
                     INT <= 1;
                 end
             end
