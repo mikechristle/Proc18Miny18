@@ -6,10 +6,13 @@
 // Proc18 System. Includes Core18, data RAM, code ROM and constants ROM.
 // Parameters set the memory size of code ROM, constants ROM and RAM,
 // by setting the number of address bits. Default is 4K words each.
+// The constants ROM can have size 0, where the ROM is not instantiated
+// and all reads return zero;
 //
 // History: 
 // 0.1.0   05/10/2018   File Created
 // 1.0.0   09/01/2020   Initial release
+// 1.1.0   09/13/2020   Allow constants ROM to have size zero
 //////////////////////////////////////////////////////////////////////////////
 // Copyright 2020 Mike Christle
 //
@@ -72,13 +75,6 @@ module Proc18(CLK, RUN, DI, VECTOR, BITSIN,
     assign CS = PORT_WR | PORT_RD;
     assign WE = PORT_WR;
 
-    CONST_Nx18 #(
-        .ADRS_BITS(CON_ADRS_BITS))
-    CONST_ROM_ (
-        .CLK(CLK), 
-        .AD(ADRS[CON_ADRS_BITS - 1: 0]), 
-        .DO(CONST_DATA));
-
     Core18  Core18_ (
         .CLK(CLK),
         .RUN(RUN),
@@ -96,14 +92,36 @@ module Proc18(CLK, RUN, DI, VECTOR, BITSIN,
         .PORT_WR(PORT_WR),
         .RAM_WR(RAM_WR));
 
-    DataInMux  DataInMux_ (
-        .CLK(CLK),
-        .CONST(CONST_DATA),
-        .CONST_RD(CONST_RD),
-        .PORT(DI),
-        .PORT_RD(PORT_RD),
-        .RAM(RAM_DATA),
-        .Z(DATAIN));
+    generate
+        if (CON_ADRS_BITS == 0) begin
+            DataInMux  DataInMux_ (
+                .CLK(CLK),
+                .CONST(18'd0),
+                .CONST_RD(CONST_RD),
+                .PORT(DI),
+                .PORT_RD(PORT_RD),
+                .RAM(RAM_DATA),
+                .Z(DATAIN));
+        end
+        else begin
+            CONST_Nx18 #(
+                .ADRS_BITS(CON_ADRS_BITS))
+            CONST_ROM_ (
+                .CLK(CLK),
+                .AD(ADRS[CON_ADRS_BITS - 1: 0]),
+                .DO(CONST_DATA));
+
+            DataInMux  DataInMux_ (
+                .CLK(CLK),
+                .CONST(CONST_DATA),
+                .CONST_RD(CONST_RD),
+                .PORT(DI),
+                .PORT_RD(PORT_RD),
+                .RAM(RAM_DATA),
+                .Z(DATAIN));
+        end
+
+    endgenerate
 
     RAM_Nx18 #(
         .ADRS_BITS(RAM_ADRS_BITS))
