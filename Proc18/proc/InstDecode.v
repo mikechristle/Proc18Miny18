@@ -10,6 +10,7 @@
 // 1.0.0   09/01/2020   Initial release
 // 1.1.0   09/07/2020   Add one clock delay on RUN input to sync to CLK
 // 1.2.0   09/08/2020   Optimize interrupt processing and cleanup
+// 1.2.1   09/13/2020   Specify bit size on addition operations
 //////////////////////////////////////////////////////////////////////////////
 // Copyright 2020 Mike Christle
 //
@@ -151,11 +152,11 @@ module InstDecode(
                    (state[0] && op_call)   ? pc_plus_one : // CALL
                                              PCO;          // Default
 
-            SP <= (state[9])                ? SP - 1 : // Interrupt
-                  (state[0] && op_call)     ? SP - 1 : // CALL
-                  (state[6])                ? SP + 1 : // RTS, RTI
-                  (state[0] && PC == 12'd0) ? 18'd0  : // Restart
-                                              SP;      // Default
+            SP <= (state[9])                ? SP - 18'd1 : // Interrupt
+                  (state[0] && op_call)     ? SP - 18'd1 : // CALL
+                  (state[6])                ? SP + 18'd1 : // RTS, RTI
+                  (state[0] && PC == 12'd0) ? 18'd0      : // Restart
+                                              SP;          // Default
 
             state <= (interrupt)           ? STATE_9 : // Interrupt
                      (state[0] && op_ldi)  ? STATE_1 : // LDI
