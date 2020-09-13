@@ -4,6 +4,7 @@
 // History: 
 // 0.1.0   07/27/2017   File Created
 // 1.0.0   09/01/2020   Initial release
+// 1.1.0   09/13/2020   Add hardware config directive
 //-----------------------------------------------------------------------------
 // Copyright 2020 Mike Christle
 //
@@ -51,6 +52,10 @@ public class Miny18Asm
         public int line_no;
         public String marker;
     }
+
+    private int rom_size = 4096;
+    private int ram_size = 4096;
+    private int con_size = 4096;
 
     private String marker, opcode, p1, p2;
     private HashMap<String, Integer> markers = new HashMap<>();
@@ -152,14 +157,21 @@ public class Miny18Asm
     //-------------------------------------------------------------------------
     public void write_output(String file_name) throws MError
     {
-        int [] ta = new int[4096];
+        int [] ta = new int[(rom_size > con_size) ? rom_size : con_size];
         int i;
+
+        if (insts.size() > rom_size)
+            throw new MError("Code ROM size is too small");
+
+        if (consts.size() > con_size)
+            throw new MError("Constants ROM size is too small");
+
         try
         {
             FileWriter ofp = new FileWriter("code.hex");
-            for (i = 0; i < insts.size() && i < 4096; i++)
+            for (i = 0; i < insts.size(); i++)
                 ta[i] = insts.get(i).opcode;
-            for (i = 0; i < 4096; i++)
+            for (i = 0; i < rom_size; i++)
             {
                 String str = String.format("%05X ", ta[i]);
                 ofp.write(str);
@@ -167,17 +179,20 @@ public class Miny18Asm
             }
             ofp.close();
 
-            ofp = new FileWriter("const.hex");
-            for (i = 0; i < consts.size() && i < 4096; i++)
-                ta[i] = consts.get(i);
-            for (; i < 4096; i++) ta[i] = 0;
-            for (i = 0; i < 4096; i++)
+            if (con_size > 0)
             {
-                String str = String.format("%05X ", ta[i]);
-                ofp.write(str);
-                if ((i % 16) == 15) ofp.write('\n');
+                ofp = new FileWriter("const.hex");
+                for (i = 0; i < consts.size(); i++)
+                    ta[i] = consts.get(i);
+                for (; i < con_size; i++) ta[i] = 0;
+                for (i = 0; i < con_size; i++)
+                {
+                    String str = String.format("%05X ", ta[i]);
+                    ofp.write(str);
+                    if ((i % 16) == 15) ofp.write('\n');
+                }
+                ofp.close();
             }
-            ofp.close();
         }
         catch (IOException e)
         {
@@ -288,14 +303,12 @@ public class Miny18Asm
 
                 case "ORG":  org_opcode(); break;
                 case "DC":   define_int_const(); break;
+                case "CONFIG": config(); break;
                 case "": break;
 
                 default:
                     throw new MError("Invalid opcode: " + opcode);
             }
-
-            if (prog_cntr > 4095)
-                throw new MError("Exceeded code space");
         } 
         catch (NumberFormatException e)
         {
@@ -311,6 +324,42 @@ public class Miny18Asm
         // Parse the value
         p1 = get_str();
         prog_cntr = Integer.parseInt(p1);
+    }
+
+    //-------------------------------------------------------------------------
+    private void config() throws MError
+    {
+        skip_whitespace();
+        String roms = get_str();
+        skip_whitespace();
+        String rams = get_str();
+        skip_whitespace();
+        String cons = get_str();
+
+        int romi, rami, coni;
+        try
+        {
+            romi = Integer.parseInt(roms);
+            rami = Integer.parseInt(rams);
+            coni = Integer.parseInt(cons);
+        }
+        catch (NumberFormatException e)
+        {
+            throw new MError("Invalid config statement");
+        }
+
+        if (romi < 1 || romi > 12)
+            throw new MError("Invalid ROM config statement");
+
+        if (rami < 1 || rami > 18)
+            throw new MError("Invalid RAM config statement");
+
+        if (coni < 0 || coni > 12)
+            throw new MError("Invalid constants config statement");
+
+        rom_size = 1 << romi;
+        ram_size = 1 << rami;
+        con_size = (coni == 0) ? 0 : 1 << coni;
     }
 
     //-------------------------------------------------------------------------
