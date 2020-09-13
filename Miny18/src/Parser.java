@@ -4,6 +4,7 @@
 // History: 
 // 0.1.0   07/27/2017   File Created
 // 1.0.0   09/01/2020   Initial release
+// 1.1.0   09/13/2020   Add hardware config statement
 //-----------------------------------------------------------------------------
 // Copyright 2020 Mike Christle
 //
@@ -46,7 +47,7 @@ public class Parser
     }
 
     //-------------------------------------------------------------------------
-    // Start -> ModuleDecl* ;
+    // Start -> ConfigStmt | ModuleDecl* ;
     //-------------------------------------------------------------------------
     public void start() throws MError
     {
@@ -59,6 +60,7 @@ public class Parser
             {
                 Token tk = scanner.token();
                 if      (tk.id == TokenId.EOF) break;
+                else if (tk.id == TokenId.CONFIG) ConfigStmt();
                 else if (tk.id == TokenId.MODULE)
                 {
                     ModuleDecl();
@@ -68,6 +70,37 @@ public class Parser
                     throw new MError("Invalid statement", tk.src);
             }
         }
+    }
+
+    //-------------------------------------------------------------------------
+    // ConfigStmt -> config IntConst IntConst IntConst ;
+    //-------------------------------------------------------------------------
+    private void ConfigStmt() throws MError
+    {
+        scanner.next(); // config
+        Token tk1 = scanner.token();
+        scanner.expect(TokenId.ICON);
+        Token tk2 = scanner.token();
+        scanner.expect(TokenId.ICON);
+        Token tk3 = scanner.token();
+        scanner.expect(TokenId.ICON);
+
+        int rom_bits = (int)(tk1.value);
+        int ram_bits = (int)(tk2.value);
+        int con_bits = (int)(tk3.value);
+
+        if (rom_bits < 1 || rom_bits > 12)
+            throw new MError("ROM size error", tk1.src);
+
+        if (ram_bits < 1 || ram_bits > 18)
+            throw new MError("RAM size error", tk2.src);
+
+        if (con_bits < 0 || con_bits > 18)
+            throw new MError("Constants size error", tk3.src);
+
+        Module.rom_bits = rom_bits;
+        Module.ram_bits = ram_bits;
+        Module.con_bits = con_bits;
     }
 
     //-------------------------------------------------------------------------

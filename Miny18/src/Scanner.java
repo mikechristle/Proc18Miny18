@@ -4,6 +4,7 @@
 // History: 
 // 0.1.0   07/27/2017   File Created
 // 1.0.0   09/01/2020   Initial release
+// 1.1.0   09/13/2020   Add config command
 //-----------------------------------------------------------------------------
 // Copyright 2020 Mike Christle
 //
@@ -277,6 +278,7 @@ public class Scanner
             case "if"       : id = TokenId.IF; break;
             case "elif"     : id = TokenId.ELIF; break;
             case "else"     : id = TokenId.ELSE; break;
+            case "config"   : id = TokenId.CONFIG; break;
             case "and"      : id = TokenId.MATHOP; mop = MathOp.LG_AND; break;
             case "or"       : id = TokenId.MATHOP; mop = MathOp.LG_OR; break;
             case "not"      : id = TokenId.MATHOP; mop = MathOp.LG_NOT; break;

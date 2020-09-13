@@ -16,7 +16,9 @@
 // ;    Rule terminator
 //---------------------------------------------------------------------------
 
-Start        -> ModuleDecl* ;
+Start        -> ConfigStmt | ModuleDecl* ;
+
+ConfigStmt   -> config IntConst IntConst IntConst ;
 
 ModuleDecl   -> module Label '{' ( ItemDecl | FuncDecl )* '}' ;
 

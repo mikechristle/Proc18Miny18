@@ -4,6 +4,7 @@
 // History: 
 // 0.1.0   07/27/2017   File Created
 // 1.0.0   09/01/2020   Initial release
+// 1.1.0   09/13/2020   Add variables to track hardwage config
 //-----------------------------------------------------------------------------
 // Copyright 2020 Mike Christle
 //
@@ -37,6 +38,10 @@ public class Module
     public static String[] isr_labels = new String[16];
     public static HashMap<String, Module> modules =
                      new HashMap<String, Module>();
+
+    public static int rom_bits = 12;
+    public static int ram_bits = 12;
+    public static int con_bits = 12;
 
     //-------------------------------------------------------------------------
     public static Symbol find_symbol(Func func, String label) throws MError
