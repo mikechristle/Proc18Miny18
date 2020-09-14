@@ -14,6 +14,7 @@
 // 2.1.0   09/10/2020   Reduce sample time by reducing divider to 8 bits
 // 2.1.1   09/10/2020   Correct initial states
 // 2.1.2   09/12/2020   Specify bit size on add equations
+// 2.2.0   09/14/2020   Rename COUNTER_BITS parameter
 //////////////////////////////////////////////////////////////////////////////
 // Copyright 2020 Mike Christle
 //
@@ -41,7 +42,7 @@
 
 module RotaryEncoder(CLK, CLK_10U, CS, WE, A, B, DI, DO, INT);
 
-    parameter COUNTER_BITS = 8;
+    parameter BITS = 8;
 
     input CLK;
     input CLK_10U;
@@ -49,9 +50,9 @@ module RotaryEncoder(CLK, CLK_10U, CS, WE, A, B, DI, DO, INT);
     input WE;
     input A;
     input B;
-    input [COUNTER_BITS - 1:0] DI;
+    input [BITS - 1:0] DI;
 
-    output reg [COUNTER_BITS - 1:0] DO = 0;
+    output reg [BITS - 1:0] DO = 0;
     output reg INT = 0;
 
     reg last_a = 1;
