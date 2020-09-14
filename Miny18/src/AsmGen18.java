@@ -4,6 +4,7 @@
 // History: 
 // 0.1.0   07/27/2017   File Created
 // 1.0.0   09/01/2020   Initial release
+// 1.1.0   09/14/2020   Add hardware config command
 //-------------------------------------------------------------------
 // Copyright 2020 Mike Christle
 //
@@ -236,9 +237,13 @@ public class AsmGen18
     }
 
     //---------------------------------------------------------------
-    private void write_consts() throws IOException
+    private void write_consts() throws IOException, MError
     {
         int rom_offset = 0;
+
+        ofp.write(String.format("    CONFIG  %d %d %d\n",
+                  Module.rom_bits, Module.ram_bits, Module.con_bits));
+
         ofp.write("    ORG     0\n");
         for (String mkey : Module.modules.keySet())
         {
@@ -258,6 +263,9 @@ public class AsmGen18
             }
         }
         ofp.write('\n');
+
+        if (rom_offset > (1 << Module.con_bits))
+            throw new MError("Constants ROM too small");
     }
 
     //---------------------------------------------------------------
