@@ -4,6 +4,8 @@
 // History: 
 // 0.1.0   07/27/2017   File Created
 // 1.0.0   09/01/2020   Initial release
+// 1.1.0   09/16/2020   Add NOP command
+//                      Change NOP ICodeId to NONE to support NOP command
 //-----------------------------------------------------------------------------
 // Copyright 2020 Mike Christle
 //
@@ -29,7 +31,7 @@
 //-----------------------------------------------------------------------------
 enum ICodeId
 {
-    NOP,    // id
+    NONE,   // id
     MARKER, // id > Marker
     JMP,    // id > Marker
     JMPT,   // id > Marker, Expr
@@ -48,6 +50,7 @@ enum ICodeId
     RESET,  // id
     RESTART,// id
     PAUSE,  // id
+    NOP,    // id
     LEVEL,  // id > Value
     IN,     // id > Label, Adrs
     OUT,    // id > Label, Adrs

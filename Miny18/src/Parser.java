@@ -5,6 +5,7 @@
 // 0.1.0   07/27/2017   File Created
 // 1.0.0   09/01/2020   Initial release
 // 1.1.0   09/13/2020   Add hardware config statement
+// 1.2.0   09/16/2020   Add nop statement
 //-----------------------------------------------------------------------------
 // Copyright 2020 Mike Christle
 //
@@ -376,13 +377,14 @@ public class Parser
     //-------------------------------------------------------------------------
     // Statement -> DataDecl | AssignStmt
     //            | IfStmt | LoopStmt | BreakStmt | ContinueStmt
-    //            | LevelStmt | HaltStmt | TimerStmt | PauseStmt
+    //            | LevelStmt | HaltStmt | TimerStmt | PauseStmt | NopStmt
     //            | ResetStmt | RestartStmt | ReturnStmt | CodeBlock ;
     //
     // BreakStmt    -> break ;
     // ContinueStmt -> continue ;
     // HaltStmt     -> halt ;
     // PauseStmt    -> pause ;
+    // NopStmt      -> nop ;
     // ResetStmt    -> reset ;
     // RestartStmt  -> restart ;
     //-------------------------------------------------------------------------
@@ -413,6 +415,9 @@ public class Parser
             case PAUSE:
                 scanner.next(); // pause
                 return new Node(NodeId.PAUSE, tk.src);
+            case NOP:
+                scanner.next(); // nop
+                return new Node(NodeId.NOP, tk.src);
             case RESET:
                 scanner.next(); // reset
                 return new Node(NodeId.RESET, tk.src);

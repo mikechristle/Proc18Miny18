@@ -4,6 +4,7 @@
 // History: 
 // 0.1.0   07/27/2017   File Created
 // 1.0.0   09/01/2020   Initial release
+// 1.1.0   09/16/2020   Change NOP ICodeId to NONE to support NOP command
 //-----------------------------------------------------------------------------
 // Copyright 2020 Mike Christle
 //
@@ -44,7 +45,7 @@ public class Util
                 for (int i = 0; i < func.icodes.size(); i++)
                 {
                     ICode icode = func.icodes.get(i);
-                    if (icode.id != ICodeId.NOP)
+                    if (icode.id != ICodeId.NONE)
                     {
                         String str = icode.toString();
                         str = String.format("%3d %s", i, str);

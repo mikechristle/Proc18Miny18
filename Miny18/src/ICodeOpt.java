@@ -4,6 +4,8 @@
 // History: 
 // 0.1.0   07/27/2017   File Created
 // 1.0.0   09/01/2020   Initial release
+// 1.1.0   09/16/2020   Add NOP command
+//                      Change NOP ICodeId to NONE to support NOP command
 //-----------------------------------------------------------------------------
 // Copyright 2020 Mike Christle
 //
@@ -73,7 +75,7 @@ public class ICodeOpt
                 else
                 {
                     markers.put((String)icode.parm, top_idx);
-                    icode.id = ICodeId.NOP;
+                    icode.id = ICodeId.NONE;
                 }
             }
             else
@@ -118,9 +120,9 @@ public class ICodeOpt
                         str = (String)jcode.parm;
                         if (markers.containsKey(str))
                             markers.remove(str);
-                        icodes.get(jcode.p2).id = ICodeId.NOP;
+                        icodes.get(jcode.p2).id = ICodeId.NONE;
                     }
-                    jcode.id = ICodeId.NOP;
+                    jcode.id = ICodeId.NONE;
                 }
             }
         }
@@ -170,7 +172,7 @@ public class ICodeOpt
                 if (markers.containsKey(str))
                 {
                     markers.remove(str);
-                    icode.id = ICodeId.NOP;
+                    icode.id = ICodeId.NONE;
                 }
             }
         }
@@ -188,7 +190,7 @@ public class ICodeOpt
                     if (icode.id == ICodeId.MARKER ||
                         icode.id == ICodeId.RETURN) break;
 
-                    icode.id = ICodeId.NOP;
+                    icode.id = ICodeId.NONE;
                 }
             }
         }
@@ -207,7 +209,7 @@ public class ICodeOpt
                     String m2 = (String)jcode.parm;
                     if (m1.equals(m2))
                     {
-                        icode.id = ICodeId.NOP;
+                        icode.id = ICodeId.NONE;
                     }
                 }
             }
@@ -218,7 +220,7 @@ public class ICodeOpt
     private int find_next(int i)
     {
         i++;
-        while (icodes.get(i).id == ICodeId.NOP) i++;
+        while (icodes.get(i).id == ICodeId.NONE) i++;
         return i;
     }
 }

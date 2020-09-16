@@ -4,6 +4,8 @@
 // History: 
 // 0.1.0   07/27/2017   File Created
 // 1.0.0   09/01/2020   Initial release
+// 1.1.0   09/16/2020   Add NOP command
+//                      Change NOP ICodeId to NONE to support NOP command
 //-----------------------------------------------------------------------------
 // Copyright 2020 Mike Christle
 //
@@ -104,13 +106,14 @@ public class AsmGen18Offsets
             icode = func.icodes.get(i);
             switch (icode.id)
             {
-                case NOP:    // id
+                case NONE:   // id
                 case MARKER: // id > Marker
                 case JMP:    // id > Marker
                 case HALT:   // id
                 case RESTART:// id
                 case RESET:  // id
                 case PAUSE:  // id
+                case NOP:    // id
                 case LEVEL:  // id > Value
                 case BCON:   // id > Value
                 case ICON:   // id > Value
@@ -132,8 +135,8 @@ public class AsmGen18Offsets
                         ic1.id == ICodeId.REG)
                     {
                         ic2.offset = ic1.offset;
-                        ic1.id = ICodeId.NOP;
-                        icode.id = ICodeId.NOP;
+                        ic1.id = ICodeId.NONE;
+                        icode.id = ICodeId.NONE;
                     }
                     break;
 

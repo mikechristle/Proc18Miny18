@@ -4,6 +4,7 @@
 // History: 
 // 0.1.0   07/27/2017   File Created
 // 1.0.0   09/01/2020   Initial release
+// 1.1.0   09/16/2020   Add NOP statement
 //-----------------------------------------------------------------------------
 // Copyright 2020 Mike Christle
 //
@@ -34,6 +35,7 @@ enum NodeId
     CONTINUE,   // Id
     HALT,       // Id
     PAUSE,      // Id
+    NOP,        // Id
     RESET,      // Id
     RESTART,    // Id
     ICON,       // Id > Value

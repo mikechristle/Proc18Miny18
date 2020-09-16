@@ -5,6 +5,7 @@
 // 0.1.0   07/27/2017   File Created
 // 1.0.0   09/01/2020   Initial release
 // 1.1.0   09/13/2020   Add config command
+// 1.2.0   09/16/2020   Add nop command
 //-----------------------------------------------------------------------------
 // Copyright 2020 Mike Christle
 //
@@ -266,6 +267,7 @@ public class Scanner
             case "halt"     : id = TokenId.HALT; break;
             case "pause"    : id = TokenId.PAUSE; break;
             case "timer"    : id = TokenId.TIMER; break;
+            case "nop"      : id = TokenId.NOP; break;
             case "return"   : id = TokenId.RETURN; break;
             case "reset"    : id = TokenId.RESET; break;
             case "restart"  : id = TokenId.RESTART; break;

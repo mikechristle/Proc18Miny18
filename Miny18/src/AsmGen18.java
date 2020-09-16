@@ -5,6 +5,8 @@
 // 0.1.0   07/27/2017   File Created
 // 1.0.0   09/01/2020   Initial release
 // 1.1.0   09/14/2020   Add hardware config command
+// 1.2.0   09/16/2020   Add NOP command
+//                      Change NOP ICodeId to NONE to support NOP command
 //-------------------------------------------------------------------
 // Copyright 2020 Mike Christle
 //
@@ -324,6 +326,7 @@ public class AsmGen18
 
                 case HALT:    emit0("HALT\n"); break;
                 case PAUSE:   emit0("PAUSE\n"); break;
+                case NOP:     emit0("NOP\n"); break;
                 case RESET:   emit0("RESET\n"); break;
                 case RESTART: emit0("RESTART\n"); break;
 
@@ -440,7 +443,7 @@ public class AsmGen18
                     address_icode(icode, ic1, true);
                     break;
 
-                case NOP: break;
+                case NONE: break;
             }
         }
     }

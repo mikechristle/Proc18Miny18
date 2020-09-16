@@ -102,6 +102,7 @@ public class ICodeGen
             case CONTINUE: return continue_node(node);
             case HALT:     return id_node(node, ICodeId.HALT);
             case PAUSE:    return id_node(node, ICodeId.PAUSE);
+            case NOP:      return id_node(node, ICodeId.NOP);
             case RESET:    return id_node(node, ICodeId.RESET);
             case RESTART:  return id_node(node, ICodeId.RESTART);
 

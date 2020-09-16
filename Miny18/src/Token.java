@@ -5,6 +5,7 @@
 // 0.1.0   07/27/2017   File Created
 // 1.0.0   09/01/2020   Initial release
 // 1.1.0   09/13/2020   Add config command
+// 1.2.0   09/16/2020   Add nop command
 //-----------------------------------------------------------------------------
 // Copyright 2020 Mike Christle
 //
@@ -34,7 +35,7 @@ enum TokenId
     MATHOP, COMPARE,
     MODULE, FUNC, ISR,
     LABEL, ASSIGN, CONFIG,
-    IF, ELIF, ELSE,
+    IF, ELIF, ELSE, NOP,
     LOOP, BREAK, CONTINUE,
     LEVEL, HALT, PAUSE, TIMER,
     RETURN, RESET, RESTART,

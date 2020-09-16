@@ -54,6 +54,7 @@ Statement    -> DataDecl
               | HaltStmt
               | TimerStmt
               | PauseStmt
+              | NopStmt
               | ReturnStmt
               | CodeBlock ;
 
@@ -96,6 +97,8 @@ HaltStmt     -> halt ;
 TimerStmt    -> timer OrExpr ;
 
 PauseStmt    -> pause ;
+
+NopStmt      -> nop ;
 
 ReturnStmt   -> return ( LogAndExpr )? ;
 

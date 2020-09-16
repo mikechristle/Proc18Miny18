@@ -25,6 +25,7 @@ module TestISR
 
         timer 3500
         pause
+        nop
         Util.checki(0x102, i1, 0)
 
         IO.INT_TIMER = 0
