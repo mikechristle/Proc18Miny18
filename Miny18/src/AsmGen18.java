@@ -7,6 +7,7 @@
 // 1.1.0   09/14/2020   Add hardware config command
 // 1.2.0   09/16/2020   Add NOP command
 //                      Change NOP ICodeId to NONE to support NOP command
+// 1.2.0   10/12/2020   Fix bug in boolean register allocation
 //-------------------------------------------------------------------
 // Copyright 2020 Mike Christle
 //
@@ -171,8 +172,8 @@ public class AsmGen18
                     case BCON:
                     case BIT:
                     case MATHB:
-                        if (icode.offset < 0)
-                            icode.offset = func.bit_base - icode.offset - 1;
+                    case COMPI:
+                        icode.offset = func.bit_base - icode.offset - 1;
                         break;
 
                     case CALL:
@@ -831,13 +832,20 @@ public class AsmGen18
             default:     op = "BNOT"; break;
         }
 
-        if (icode.offset != ic1.offset)
-            emit2("BMOV", icode.offset, ic1.offset);
-
         if (ic2 == null)
             emit2(op, icode.offset, icode.offset);
-        else
+
+        else if (icode.offset == ic1.offset)
             emit2(op, icode.offset, ic2.offset);
+
+        else if (icode.offset == ic2.offset)
+            emit2(op, icode.offset, ic1.offset);
+
+        else
+        {
+            emit2("BMOV", icode.offset, ic1.offset);
+            emit2(op, icode.offset, ic2.offset);
+        }
     }
 
     //---------------------------------------------------------------

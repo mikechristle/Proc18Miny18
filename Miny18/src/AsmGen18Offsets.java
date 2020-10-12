@@ -6,6 +6,7 @@
 // 1.0.0   09/01/2020   Initial release
 // 1.1.0   09/16/2020   Add NOP command
 //                      Change NOP ICodeId to NONE to support NOP command
+// 1.2.0   10/12/2020   Fix bug in boolean register allocation
 //-----------------------------------------------------------------------------
 // Copyright 2020 Mike Christle
 //
@@ -271,7 +272,7 @@ public class AsmGen18Offsets
     {
         for (int ikey : temp_bits.keySet())
         {
-            if (temp_bits.get(ikey) < idx)
+            if (temp_bits.get(ikey) <= idx)
             {
                 temp_bits.put(ikey, last_ref);
                 return ikey;
