@@ -7,7 +7,8 @@
 // 1.1.0   09/14/2020   Add hardware config command
 // 1.2.0   09/16/2020   Add NOP command
 //                      Change NOP ICodeId to NONE to support NOP command
-// 1.2.0   10/12/2020   Fix bug in boolean register allocation
+// 1.2.1   10/12/2020   Fix bug in boolean register allocation
+// 1.2.2   10/22/2020   Fix bug in single operand boolean operations
 //-------------------------------------------------------------------
 // Copyright 2020 Mike Christle
 //
@@ -833,7 +834,7 @@ public class AsmGen18
         }
 
         if (ic2 == null)
-            emit2(op, icode.offset, icode.offset);
+            emit2(op, icode.offset, ic1.offset);
 
         else if (icode.offset == ic1.offset)
             emit2(op, icode.offset, ic2.offset);
